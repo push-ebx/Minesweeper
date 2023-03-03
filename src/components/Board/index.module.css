@@ -1,0 +1,9 @@
+:root {
+  --cell-size: 30px;
+  --cell-margin: 2px;
+  --cell-count: 16;
+}
+
+.board {
+
+}
