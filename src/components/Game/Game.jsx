@@ -5,7 +5,7 @@ import Board from "../Board";
 const Game = () => {
   return (
     <div className={styles.game}>
-      <Board width={16} height={16} mines={40}/>
+      <Board width={16} height={16} mines={10}/>
     </div>
   );
 };
