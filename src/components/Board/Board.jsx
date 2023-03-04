@@ -2,7 +2,8 @@ import React, {useEffect, useState} from 'react';
 import styles from './index.module.css'
 import Cell from "../Cell";
 
-const Board = ({width, height, mines, is_game, setIs_game, is_lose_game, setIs_lose_game, restart}) => {
+const Board = ({width, height, mines, is_game, setIs_game, is_lose_game,
+                 setIs_lose_game, restart, setRemainingMines}) => {
   const [cells, setCells] = useState([])
 
   const get_array_mines = (row_first, col_first) => {
@@ -38,6 +39,7 @@ const Board = ({width, height, mines, is_game, setIs_game, is_lose_game, setIs_l
         )
       }
     }
+    setRemainingMines(mines)
     setCells(_cells)
   }
 
@@ -135,7 +137,14 @@ const Board = ({width, height, mines, is_game, setIs_game, is_lose_game, setIs_l
 
   const onRightClick = ({row, col}) => {
     if (is_lose_game) return
-    updateCell(row, col, {...cells[row][col], is_flag: !cells[row][col].is_flag})
+    if (!cells[row][col].is_open) {
+      updateCell(row, col, {...cells[row][col], is_flag: !cells[row][col].is_flag})
+      if (cells[row][col].is_flag) {
+        setRemainingMines(prev => prev > 0 ? prev - 1: 0)
+      } else {
+        setRemainingMines(prev => prev + 1)
+      }
+    }
   }
 
   useEffect(() => {
