@@ -9,7 +9,7 @@
   height: 100vh;
   justify-content: center;
   align-items: center;
-  background: #FAFAFA;
+  background: #b6b6b6;
 }
 
 .navbar {
@@ -35,5 +35,4 @@
   border-bottom: 3px solid #7B7B7B;
   border-top: 3px solid #FAFAFA;
   border-left: 3px solid #FAFAFA;
-  padding-bottom: -2px;
 }
