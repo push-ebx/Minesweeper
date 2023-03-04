@@ -1,6 +1,7 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styles from './index.module.css'
 import Board from "../Board";
+import Stopwatch from "../Stopwatch";
 
 const Game = () => {
   const [is_game, setIs_game] = useState(false)
@@ -9,6 +10,7 @@ const Game = () => {
 
   return (
     <div className={styles.game}>
+      <Stopwatch is_launched={is_game && !is_lose_game} is_clear={restart}/>
       <button
         onClick={() => {
           setIs_game(false)
