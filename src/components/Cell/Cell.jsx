@@ -16,7 +16,7 @@ const icons = {
   mine_8: process.env.PUBLIC_URL + './assets/images/8_mine.png',
 }
 
-const Cell = ({cell, onMouseUpCell}) => {
+const Cell = ({cell, onMouseUpCell, onMouseDownCell, onRightClick}) => {
   const [state, setState] = useState('closed')
   useEffect(() => {
     if (cell.is_open && cell.is_mine) {
@@ -28,17 +28,35 @@ const Cell = ({cell, onMouseUpCell}) => {
     else if (cell.is_open && !cell.is_mine && cell.count_neighbours) {
       setState(`mine_${cell.count_neighbours}`)
     }
+    else if (!cell.is_open && cell.is_flag) {
+      setState('flag')
+    }
+    else if (!cell.is_open && cell.is_pushed) {
+      setState('mine_0')
+    }
     else if (!cell.is_open) {
       setState('closed')
     }
-  }, [cell.is_mine, cell.count_neighbours, cell.is_open])
+  }, [cell.is_mine, cell.count_neighbours, cell.is_open, cell.is_flag, cell.is_pushed])
 
   return (
     <>
       <img
         className={styles.cell}
         src={icons[state]}
-        onMouseUp={() => onMouseUpCell(cell)}
+        onMouseUp={(e) => {
+          if (e.nativeEvent.button === 0) onMouseUpCell(cell)
+        }}
+        onMouseDown={(e) => {
+          if (e.nativeEvent.button === 0) onMouseDownCell(cell)
+        }}
+        onContextMenu={(e)=> { // отдельно
+          console.log(123)
+          e.preventDefault();
+          e.stopPropagation();
+          onRightClick(cell)
+          return false
+        }}
         alt={''}
       />
       {cell.col === cell.width_board-1 && <br/>}

@@ -30,6 +30,8 @@ const Board = ({width, height, mines}) => {
             col,
             is_mine: false,
             is_open: false,
+            is_flag: false,
+            is_pushed: false,
             count_neighbours: 0,
             width_board: width
           }
@@ -69,6 +71,7 @@ const Board = ({width, height, mines}) => {
     const _cells = [...cells]
     const queue = [_cells[row][col]]
     const marked_cells = []
+    let c = 0;
 
     while (queue.length) { // check bombs
       let curr = queue.shift()
@@ -78,31 +81,19 @@ const Board = ({width, height, mines}) => {
 
       if (_cells[row_curr][col_curr].count_neighbours) continue
 
-      // for (const dx of [-1, 0, 1]) {
-      //   for (const dy of [-1, 0, 1]) {
-      //     if (Math.abs(dx-dy) === 1 &&
-      //         row_curr+dy >= 0 &&
-      //         col_curr+dx >= 0 &&
-      //         row_curr+dy < height &&
-      //         col_curr+dx < width &&
-      //         !_cells[row_curr+dy][col_curr+dx].visited)
-      //     {
-      //       queue.push(_cells[row_curr+dy][col_curr+dx])
-      //     }
-      //   }
-      // }
 
-      if (row_curr-1 >= 0 && !_cells[row_curr-1][col_curr].visited) {
-        queue.push(_cells[row_curr-1][col_curr])
-      }
-      if (col_curr-1 >= 0 && !_cells[row_curr][col_curr-1].visited) {
-        queue.push(_cells[row_curr][col_curr-1])
-      }
-      if (row_curr+1 < height && !_cells[row_curr+1][col_curr].visited) {
-        queue.push(_cells[row_curr+1][col_curr])
-      }
-      if (col_curr+1 < width && !_cells[row_curr][col_curr+1].visited) {
-        queue.push(_cells[row_curr][col_curr+1])
+      for (let dx of [-1, 0, 1]) {
+        for (let dy of [-1, 0, 1]) {
+          if (
+              row_curr+dy >= 0 &&
+              col_curr+dx >= 0 &&
+              row_curr+dy < height &&
+              col_curr+dx < width &&
+              !_cells[row_curr+dy][col_curr+dx].visited)
+          {
+            queue.push(_cells[row_curr+dy][col_curr+dx])
+          }
+        }
       }
     }
     
@@ -113,13 +104,24 @@ const Board = ({width, height, mines}) => {
   }
 
   const openCell = (row, col) => {
-    if (cells[row][col].count_neighbours === 0) emptyCell(row, col)
-    updateCell(row, col, {...cells[row][col], is_open: true})
+    if (cells[row][col].is_flag) return
+    if (!cells[row][col].count_neighbours && !cells[row][col].is_mine) emptyCell(row, col)
+    if (!cells[row][col].is_open) updateCell(row, col, {...cells[row][col], is_open: true})
   }
 
   const onMouseUpCell = ({row, col}) => {
+    if (!cells[row][col].is_open) updateCell(row, col, {...cells[row][col], is_pushed: false})
     if (!is_game) start_game(row, col)
     openCell(row, col)
+  }
+
+  const onMouseDownCell = ({row, col}) => {
+    if (cells[row][col].is_flag) return
+    if (!cells[row][col].is_open) updateCell(row, col, {...cells[row][col], is_pushed: true})
+  }
+
+  const onRightClick = ({row, col}) => {
+    updateCell(row, col, {...cells[row][col], is_flag: !cells[row][col].is_flag})
   }
 
   useEffect(() => initBoard(), [])
@@ -136,13 +138,14 @@ const Board = ({width, height, mines}) => {
                 key={width*i + j + 1}
                 cell={cell}
                 onMouseUpCell={onMouseUpCell}
+                onMouseDownCell={onMouseDownCell}
+                onRightClick={onRightClick}
               />
             )
           })
         })
           : ""
       }
-      {/*{ cells.length && cells }*/}
     </div>
   );
 };
