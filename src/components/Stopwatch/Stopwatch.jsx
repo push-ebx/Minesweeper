@@ -25,9 +25,9 @@ const Stopwatch = ({is_launched, is_clear}) => {
 
   return (
     <div className={styles.stopwatch}>
-      <img src={getPath(100)} />
-      <img src={getPath(10)} />
-      <img src={getPath(1)} />
+      <img className={styles.number} src={getPath(100)} />
+      <img className={styles.number} src={getPath(10)} />
+      <img className={styles.number} src={getPath(1)} />
     </div>
   )
 }

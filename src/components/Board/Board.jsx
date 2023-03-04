@@ -3,8 +3,9 @@ import styles from './index.module.css'
 import Cell from "../Cell";
 
 const Board = ({width, height, mines, is_game, setIs_game, is_lose_game,
-                 setIs_lose_game, restart, setRemainingMines}) => {
+                 setIs_lose_game, restart, setRemainingMines, setStateRestartButton}) => {
   const [cells, setCells] = useState([])
+  const [remainingCells, setRemainingCells] = useState(width*height - mines)
 
   const get_array_mines = (row_first, col_first) => {
     if (mines >= width*height) return
@@ -32,6 +33,7 @@ const Board = ({width, height, mines, is_game, setIs_game, is_lose_game,
             is_flag: false,
             is_pushed: false,
             is_cross_mine: false,
+            is_question: false,
             is_red_mine: false,
             count_neighbours: 0,
             width_board: width
@@ -40,6 +42,7 @@ const Board = ({width, height, mines, is_game, setIs_game, is_lose_game,
       }
     }
     setRemainingMines(mines)
+    setRemainingCells(width*height - mines)
     setCells(_cells)
   }
 
@@ -73,11 +76,11 @@ const Board = ({width, height, mines, is_game, setIs_game, is_lose_game,
     const _cells = [...cells]
     const queue = [_cells[row][col]]
     const marked_cells = []
+    queue[0].visited = true
 
-    while (queue.length) { // check bombs
+    while (queue.length) {
       let curr = queue.shift()
       let row_curr = curr.row, col_curr = curr.col
-      _cells[row_curr][col_curr].visited = true
       marked_cells.push({row: row_curr, col: col_curr})
 
       if (_cells[row_curr][col_curr].count_neighbours) continue
@@ -89,9 +92,12 @@ const Board = ({width, height, mines, is_game, setIs_game, is_lose_game,
               col_curr+dx >= 0 &&
               row_curr+dy < height &&
               col_curr+dx < width &&
-              !_cells[row_curr+dy][col_curr+dx].visited)
+              !_cells[row_curr+dy][col_curr+dx].visited &&
+              !_cells[row_curr+dy][col_curr+dx].is_open
+          )
           {
             queue.push(_cells[row_curr+dy][col_curr+dx])
+            _cells[row_curr+dy][col_curr+dx].visited = true
           }
         }
       }
@@ -100,48 +106,79 @@ const Board = ({width, height, mines, is_game, setIs_game, is_lose_game,
     marked_cells.forEach(cell => {
       _cells[cell.row][cell.col].is_open = true
     })
+    setRemainingCells(prev => prev - marked_cells.length)
     setCells(_cells)
   }
 
-  const openMap = () => {
+  const openMap = (is_fail) => {
     const _cells = [...cells]
-    _cells.map(row => row.map(cell => cell.is_open = true))
+    if (is_fail) {
+      _cells.map(row => row.map(cell => {
+        cell.is_open = true
+        if (!cell.is_mine && cell.is_flag) cell.is_cross_mine = true
+      }))
+    } else {
+      _cells.map(row => row.map(cell => {
+        if (cell.is_mine) cell.is_flag = true
+      }))
+    }
     setCells(_cells)
   }
 
   const openCell = (row, col) => {
-    if (cells[row][col].is_flag) return
+    if (cells[row][col].is_flag && cells[row][col].is_question) return
     if (!cells[row][col].count_neighbours && !cells[row][col].is_mine) emptyCell(row, col)
     if (!cells[row][col].is_open && cells[row][col].is_mine) {
       updateCell(row, col, {...cells[row][col], is_open: true, is_red_mine: true})
     }
-    if (!cells[row][col].is_open) updateCell(row, col, {...cells[row][col], is_open: true})
+    if (!cells[row][col].is_open) {
+      setRemainingCells(prev => prev - 1)
+      updateCell(row, col, {...cells[row][col], is_open: true})
+    }
   }
 
   const onMouseUpCell = ({row, col}) => {
-    if (is_lose_game) return
-    if (!cells[row][col].is_open) updateCell(row, col, {...cells[row][col], is_pushed: false})
+    if (is_lose_game || !remainingCells) return
+    if (cells[row][col].is_flag || cells[row][col].is_question) return
+
+    if (!cells[row][col].is_open) {
+      updateCell(row, col, {...cells[row][col], is_pushed: false})
+    }
     if (!is_game) start_game(row, col)
     openCell(row, col)
-    if (cells[row][col].is_mine) { // отдельно
-      openMap()
+    if (!cells[row][col].is_flag && !cells[row][col].is_question && cells[row][col].is_mine) {
+      openMap(true)
       setIs_lose_game(true)
-    } // lose
+    }
   }
 
   const onMouseDownCell = ({row, col}) => {
-    if (is_lose_game) return
-    if (cells[row][col].is_flag) return
-    if (!cells[row][col].is_open) updateCell(row, col, {...cells[row][col], is_pushed: true})
+    if (is_lose_game || !remainingCells) return
+    if (cells[row][col].is_flag || cells[row][col].is_question) return
+    if (!cells[row][col].is_open) {
+      updateCell(row, col, {...cells[row][col], is_pushed: true})
+      setStateRestartButton('scared_smile')
+    }
   }
 
   const onRightClick = ({row, col}) => {
-    if (is_lose_game) return
+    if (is_lose_game || !remainingCells) return
     if (!cells[row][col].is_open) {
-      updateCell(row, col, {...cells[row][col], is_flag: !cells[row][col].is_flag})
+      if (!cells[row][col].is_flag && !cells[row][col].is_question) {
+        updateCell(row, col, {...cells[row][col], is_flag: true})
+      }
+      else if (cells[row][col].is_flag) {
+        updateCell(row, col, {...cells[row][col], is_question: true, is_flag: false})
+      }
+      else if (cells[row][col].is_question) {
+        console.log(123213)
+        updateCell(row, col, {...cells[row][col], is_question: false})
+      }
+
       if (cells[row][col].is_flag) {
-        setRemainingMines(prev => prev > 0 ? prev - 1: 0)
-      } else {
+        setRemainingMines(prev => prev - 1)
+      }
+      else if (!cells[row][col].is_question && !cells[row][col].is_flag) {
         setRemainingMines(prev => prev + 1)
       }
     }
@@ -150,6 +187,16 @@ const Board = ({width, height, mines, is_game, setIs_game, is_lose_game,
   useEffect(() => {
     initBoard()
   }, [restart])
+
+  useEffect(() => {
+    if (!remainingCells) {
+      setStateRestartButton('cool_smile')
+      openMap(false)
+      setIs_game(false)
+    } else {
+      setStateRestartButton('default_smile')
+    }
+  }, [remainingCells])
 
   return (
     <div className={styles.board}>

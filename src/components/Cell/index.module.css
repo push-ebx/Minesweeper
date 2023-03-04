@@ -1,6 +1,6 @@
 .cell {
-  display: inline-block;
+  display: inline;
+  margin-bottom: -2px;
   width: var(--cell-size);
   height: var(--cell-size);
-  margin: -2px;
 }

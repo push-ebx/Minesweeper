@@ -16,15 +16,19 @@ const icons = {
   mine_6: process.env.PUBLIC_URL + './assets/images/6_mine.png',
   mine_7: process.env.PUBLIC_URL + './assets/images/7_mine.png',
   mine_8: process.env.PUBLIC_URL + './assets/images/8_mine.png',
+  question: process.env.PUBLIC_URL + './assets/images/question.png',
 }
 
 const Cell = ({cell, onMouseUpCell, onMouseDownCell, onRightClick}) => {
   const [state, setState] = useState('closed')
   useEffect(() => {
-    if (cell.is_open && cell.is_cross_mine) {
+    if (!cell.is_open && cell.is_question) {
+      setState('question')
+    }
+    else if (cell.is_open && cell.is_cross_mine) {
       setState('cross_mine')
     }
-    if (cell.is_open && cell.is_red_mine) {
+    else if (cell.is_open && cell.is_red_mine) {
       setState('red_mine')
     }
     else if (cell.is_open && cell.is_mine) {
@@ -45,7 +49,7 @@ const Cell = ({cell, onMouseUpCell, onMouseDownCell, onRightClick}) => {
     else if (!cell.is_open) {
       setState('closed')
     }
-  }, [cell.is_mine, cell.count_neighbours, cell.is_open, cell.is_flag, cell.is_pushed])
+  }, [cell.is_mine, cell.count_neighbours, cell.is_open, cell.is_flag, cell.is_pushed, cell.is_cross_mine, cell.is_question])
 
   return (
     <>

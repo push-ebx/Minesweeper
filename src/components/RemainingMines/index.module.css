@@ -1,3 +1,7 @@
 .remaining_mines {
+  display: flex;
+}
 
+.number {
+  width: var(--number-width);
 }

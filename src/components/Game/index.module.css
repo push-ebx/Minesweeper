@@ -1,7 +1,39 @@
+:root {
+  --cell-size: 30px;
+  --number-width: 20px;
+}
+
 .game {
   display: flex;
   width: 100%;
   height: 100vh;
   justify-content: center;
   align-items: center;
+  background: #FAFAFA;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 55px;
+  margin-bottom: 10px; /* remove */
+  border-top: 3px solid #7B7B7B;
+  border-left: 3px solid #7B7B7B;
+  border-right: 3px solid #FAFAFA;
+  border-bottom: 3px solid #FAFAFA;
+  background-color: #BFBFBF;
+  padding: 0 15px;
+}
+
+.wrapper {
+  background-color: #BFBFBF;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border-right: 3px solid #7B7B7B;
+  border-bottom: 3px solid #7B7B7B;
+  border-top: 3px solid #FAFAFA;
+  border-left: 3px solid #FAFAFA;
+  padding-bottom: -2px;
 }

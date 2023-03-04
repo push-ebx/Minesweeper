@@ -1,3 +1,7 @@
 .stopwatch {
+  display: flex;
+}
 
+.number {
+  width: var(--number-width);
 }
