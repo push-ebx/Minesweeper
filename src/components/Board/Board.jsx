@@ -2,15 +2,13 @@ import React, {useEffect, useState} from 'react';
 import styles from './index.module.css'
 import Cell from "../Cell";
 
-const Board = ({width, height, mines}) => {
+const Board = ({width, height, mines, is_game, setIs_game, is_lose_game, setIs_lose_game, restart}) => {
   const [cells, setCells] = useState([])
-  const [is_game, setIs_game] = useState(false)
 
   const get_array_mines = (row_first, col_first) => {
     if (mines >= width*height) return
     const array_numbers = []
     const index_first_cell = width*row_first + col_first
-    console.log(index_first_cell)
     while (array_numbers.length < mines) {
       let number = Math.floor(Math.random() * (width*height))
       if(array_numbers.indexOf(number) === -1 && index_first_cell !== number) {
@@ -32,6 +30,8 @@ const Board = ({width, height, mines}) => {
             is_open: false,
             is_flag: false,
             is_pushed: false,
+            is_cross_mine: false,
+            is_red_mine: false,
             count_neighbours: 0,
             width_board: width
           }
@@ -71,7 +71,6 @@ const Board = ({width, height, mines}) => {
     const _cells = [...cells]
     const queue = [_cells[row][col]]
     const marked_cells = []
-    let c = 0;
 
     while (queue.length) { // check bombs
       let curr = queue.shift()
@@ -80,7 +79,6 @@ const Board = ({width, height, mines}) => {
       marked_cells.push({row: row_curr, col: col_curr})
 
       if (_cells[row_curr][col_curr].count_neighbours) continue
-
 
       for (let dx of [-1, 0, 1]) {
         for (let dy of [-1, 0, 1]) {
@@ -103,28 +101,46 @@ const Board = ({width, height, mines}) => {
     setCells(_cells)
   }
 
+  const openMap = () => {
+    const _cells = [...cells]
+    _cells.map(row => row.map(cell => cell.is_open = true))
+    setCells(_cells)
+  }
+
   const openCell = (row, col) => {
     if (cells[row][col].is_flag) return
     if (!cells[row][col].count_neighbours && !cells[row][col].is_mine) emptyCell(row, col)
+    if (!cells[row][col].is_open && cells[row][col].is_mine) {
+      updateCell(row, col, {...cells[row][col], is_open: true, is_red_mine: true})
+    }
     if (!cells[row][col].is_open) updateCell(row, col, {...cells[row][col], is_open: true})
   }
 
   const onMouseUpCell = ({row, col}) => {
+    if (is_lose_game) return
     if (!cells[row][col].is_open) updateCell(row, col, {...cells[row][col], is_pushed: false})
     if (!is_game) start_game(row, col)
     openCell(row, col)
+    if (cells[row][col].is_mine) { // отдельно
+      openMap()
+      setIs_lose_game(true)
+    } // lose
   }
 
   const onMouseDownCell = ({row, col}) => {
+    if (is_lose_game) return
     if (cells[row][col].is_flag) return
     if (!cells[row][col].is_open) updateCell(row, col, {...cells[row][col], is_pushed: true})
   }
 
   const onRightClick = ({row, col}) => {
+    if (is_lose_game) return
     updateCell(row, col, {...cells[row][col], is_flag: !cells[row][col].is_flag})
   }
 
-  useEffect(() => initBoard(), [])
+  useEffect(() => {
+    initBoard()
+  }, [restart])
 
   return (
     <div className={styles.board}>

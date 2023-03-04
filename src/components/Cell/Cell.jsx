@@ -5,6 +5,8 @@ const icons = {
   closed: process.env.PUBLIC_URL + './assets/images/closed.png',
   flag: process.env.PUBLIC_URL + './assets/images/flag.png',
   default_mine: process.env.PUBLIC_URL + './assets/images/default_mine.png',
+  cross_mine: process.env.PUBLIC_URL + './assets/images/cross_mine.png',
+  red_mine: process.env.PUBLIC_URL + './assets/images/red_mine.png',
   mine_0: process.env.PUBLIC_URL + './assets/images/on_down.png',
   mine_1: process.env.PUBLIC_URL + './assets/images/1_mine.png',
   mine_2: process.env.PUBLIC_URL + './assets/images/2_mine.png',
@@ -19,7 +21,13 @@ const icons = {
 const Cell = ({cell, onMouseUpCell, onMouseDownCell, onRightClick}) => {
   const [state, setState] = useState('closed')
   useEffect(() => {
-    if (cell.is_open && cell.is_mine) {
+    if (cell.is_open && cell.is_cross_mine) {
+      setState('cross_mine')
+    }
+    if (cell.is_open && cell.is_red_mine) {
+      setState('red_mine')
+    }
+    else if (cell.is_open && cell.is_mine) {
       setState('default_mine')
     }
     else if (cell.is_open && !cell.is_mine && !cell.count_neighbours) {
@@ -51,7 +59,6 @@ const Cell = ({cell, onMouseUpCell, onMouseDownCell, onRightClick}) => {
           if (e.nativeEvent.button === 0) onMouseDownCell(cell)
         }}
         onContextMenu={(e)=> { // отдельно
-          console.log(123)
           e.preventDefault();
           e.stopPropagation();
           onRightClick(cell)
