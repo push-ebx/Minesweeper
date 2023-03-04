@@ -171,7 +171,6 @@ const Board = ({width, height, mines, is_game, setIs_game, is_lose_game,
         updateCell(row, col, {...cells[row][col], is_question: true, is_flag: false})
       }
       else if (cells[row][col].is_question) {
-        console.log(123213)
         updateCell(row, col, {...cells[row][col], is_question: false})
       }
 

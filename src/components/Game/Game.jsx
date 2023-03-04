@@ -51,9 +51,9 @@ const Game = () => {
           <Stopwatch is_launched={is_game && !is_lose_game} is_clear={restart}/>
         </div>
         <Board
-            width={16}
-            height={16}
-            mines={40}
+            width={10}
+            height={10}
+            mines={10}
             is_game={is_game}
             is_lose_game={is_lose_game}
             setIs_game={setIs_game}
